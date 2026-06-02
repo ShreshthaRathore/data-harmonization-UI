@@ -1,0 +1,67 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  NODE_VERSION: '18.x'
+
+stages:
+
+- stage: Install
+  displayName: 'Install Dependencies'
+  jobs:
+  - job: Install
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '$(NODE_VERSION)'
+      displayName: 'Use Node.js $(NODE_VERSION)'
+
+    - script: npm ci
+      displayName: 'Install npm packages'
+
+- stage: Build
+  displayName: 'Build React App'
+  dependsOn: Install
+  jobs:
+  - job: Build
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '$(NODE_VERSION)'
+      displayName: 'Use Node.js'
+
+    - script: npm ci
+      displayName: 'Install dependencies'
+
+    - script: npm run build
+      displayName: 'Build React App'
+      env:
+        CI: false   # prevents warnings from failing the build
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'build'
+        ArtifactName: 'react-build'
+      displayName: 'Publish Build Artifact'
+
+- stage: Test
+  displayName: 'Run Tests'
+  dependsOn: Install
+  jobs:
+  - job: Test
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '$(NODE_VERSION)'
+      displayName: 'Use Node.js'
+
+    - script: npm ci
+      displayName: 'Install dependencies'
+
+    - script: npm test -- --watchAll=false --passWithNoTests
+      displayName: 'Run React Tests'
+      env:
+        CI: true
