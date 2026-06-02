@@ -19,7 +19,7 @@ stages:
         version: '$(NODE_VERSION)'
       displayName: 'Use Node.js $(NODE_VERSION)'
 
-    - script: npm ci
+    - script: npm install
       displayName: 'Install npm packages'
 
 - stage: Build
@@ -33,7 +33,7 @@ stages:
         version: '$(NODE_VERSION)'
       displayName: 'Use Node.js'
 
-    - script: npm ci
+    - script: npm install
       displayName: 'Install dependencies'
 
     - script: npm run build
@@ -58,7 +58,7 @@ stages:
         version: '$(NODE_VERSION)'
       displayName: 'Use Node.js'
 
-    - script: npm ci
+    - script: npm install
       displayName: 'Install dependencies'
 
     - script: npm test -- --watchAll=false --passWithNoTests
