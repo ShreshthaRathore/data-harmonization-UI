@@ -13,9 +13,8 @@ steps:
   displayName: 'Install Node.js'
 
 # 2. Install Dependencies
-# Uses 'npm ci' instead of 'npm install' for faster, more reliable builds in CI/CD.
 - script: |
-    npm ci
+    npm install
   displayName: 'Install dependencies'
 
 # 3. Run Tests (Optional but recommended)
