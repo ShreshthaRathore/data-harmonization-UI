@@ -12,26 +12,36 @@ steps:
   displayName: 'Install Node.js'
 
 # Step 2: Install dependencies
-- script: npm install
-  workingDirectory: '$(Build.SourcesDirectory)/data-harmonization'
+- task: Npm@1
   displayName: 'npm install'
+  inputs:
+    command: 'install'
+    # This automatically finds package.json if it's in the root or a subfolder
+    workingDir: '$(Build.SourcesDirectory)/data-harmonization' 
 
 # Step 3: Build
-- script: npm run build
-  workingDirectory: '$(Build.SourcesDirectory)/data-harmonization'
+- task: Npm@1
   displayName: 'npm run build'
+  inputs:
+    command: 'custom'
+    customCommand: 'run build'
+    workingDir: '$(Build.SourcesDirectory)/data-harmonization'
   env:
     CI: false
 
 # Step 4: Test
-- script: npm test -- --watchAll=false --passWithNoTests
-  workingDirectory: '$(Build.SourcesDirectory)/data-harmonization'
+- task: Npm@1
   displayName: 'npm test'
+  inputs:
+    command: 'custom'
+    customCommand: 'test -- --watchAll=false --passWithNoTests'
+    workingDir: '$(Build.SourcesDirectory)/data-harmonization'
   env:
     CI: true
 
 # Step 5: Publish artifact
-# This ensures Azure DevOps looks inside the subfolder for the generated 'build' directory
+# If the build step still errors out saying the directory doesn't exist, 
+# it confirms 'data-harmonization' has different casing (like Data-harmonization) in Git.
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: 'data-harmonization/build'
