@@ -1,0 +1,40 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# 1. Node.js Installer
+# Sets up the Node.js environment. Change the version to match your project.
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: 'Install Node.js'
+
+# 2. Install Dependencies
+# Uses 'npm ci' instead of 'npm install' for faster, more reliable builds in CI/CD.
+- script: |
+    npm ci
+  displayName: 'Install dependencies'
+
+# 3. Run Tests (Optional but recommended)
+# Remove this step if you don't have tests configured yet.
+- script: |
+    npm test -- --watchAll=false --passWithNoTests
+  displayName: 'Run tests'
+
+# 4. Build the React App
+# This creates a 'build' folder with your compiled, minified static files.
+- script: |
+    npm run build
+  displayName: 'Build React application'
+
+# 5. Publish Build Artifacts
+# Uploads the 'build' folder so it can be deployed in a release pipeline.
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'build'
+    ArtifactName: 'react-drop'
+    publishLocation: 'Container'
+  displayName: 'Publish artifact'
