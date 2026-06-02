@@ -1,0 +1,9 @@
+trigger:
+- feature/data-harmonization
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: echo "Pipeline is running"
+  displayName: 'Test Pipeline'
