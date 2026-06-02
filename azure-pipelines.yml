@@ -14,9 +14,9 @@ stages:
   jobs:
   - job: Install
     steps:
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '$(NODE_VERSION)'
+        version: '$(NODE_VERSION)'
       displayName: 'Use Node.js $(NODE_VERSION)'
 
     - script: npm ci
@@ -28,9 +28,9 @@ stages:
   jobs:
   - job: Build
     steps:
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '$(NODE_VERSION)'
+        version: '$(NODE_VERSION)'
       displayName: 'Use Node.js'
 
     - script: npm ci
@@ -39,7 +39,7 @@ stages:
     - script: npm run build
       displayName: 'Build React App'
       env:
-        CI: false   # prevents warnings from failing the build
+        CI: false
 
     - task: PublishBuildArtifacts@1
       inputs:
@@ -53,9 +53,9 @@ stages:
   jobs:
   - job: Test
     steps:
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '$(NODE_VERSION)'
+        version: '$(NODE_VERSION)'
       displayName: 'Use Node.js'
 
     - script: npm ci
