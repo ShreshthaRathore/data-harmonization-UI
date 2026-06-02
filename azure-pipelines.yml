@@ -11,39 +11,38 @@ steps:
     versionSpec: '18.x'
   displayName: 'Install Node.js'
 
-# Step 2: Dynamically find the folder and run npm install
+# Step 2: Find absolute path and run npm install
 - script: |
-    # Find the directory containing package.json (ignoring node_modules)
-    TARGET_DIR=$(find . -name "package.json" -not -path "*/node_modules/*" -exec dirname {} \;)
-    echo "##vso[task.setvariable variable=RepoRootDir]$TARGET_DIR"
-    echo "Found package.json in directory: $TARGET_DIR"
+    echo "Searching for package.json..."
+    # Find the absolute path of the directory containing package.json
+    TARGET_DIR=$(find $(Build.SourcesDirectory) -name "package.json" -not -path "*/node_modules/*" -exec dirname {} \;)
     
+    echo "Found package.json in absolute path: $TARGET_DIR"
+    # Save it as a global pipeline variable
+    echo "##vso[task.setvariable variable=RepoRootDir]$TARGET_DIR"
+    
+    # Navigate and install
     cd "$TARGET_DIR"
     npm install
   displayName: 'Find folder & npm install'
 
-# Step 3: Build using the dynamic path
+# Step 3: Build
 - script: |
-    cd $(RepoRootDir)
+    cd "$(RepoRootDir)"
     npm run build
   displayName: 'npm run build'
   env:
     CI: false
 
-# Step 4: Test using the dynamic path
+# Step 4: Test
 - script: |
-    cd $(RepoRootDir)
+    cd "$(RepoRootDir)"
     npm test -- --watchAll=false --passWithNoTests
   displayName: 'npm test'
   env:
     CI: true
 
-# Step 5: Publish artifact dynamically
-- script: |
-    echo "Checking build output folder..."
-    ls -la $(RepoRootDir)/build
-  displayName: 'Verify Build Output'
-
+# Step 5: Publish artifact
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(RepoRootDir)/build'
