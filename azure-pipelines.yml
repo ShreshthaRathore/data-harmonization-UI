@@ -14,12 +14,15 @@ stages:
   jobs:
   - job: Install
     steps:
-    - task: UseNode@1
+    - task: NodeTool@1
       inputs:
-        version: '$(NODE_VERSION)'
-      displayName: 'Use Node.js $(NODE_VERSION)'
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
 
-    - script: npm install
+    - script: |
+        node --version
+        npm --version
+        npm install
       displayName: 'Install npm packages'
 
 - stage: Build
@@ -28,10 +31,10 @@ stages:
   jobs:
   - job: Build
     steps:
-    - task: UseNode@1
+    - task: NodeTool@1
       inputs:
-        version: '$(NODE_VERSION)'
-      displayName: 'Use Node.js'
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
 
     - script: npm install
       displayName: 'Install dependencies'
@@ -53,10 +56,10 @@ stages:
   jobs:
   - job: Test
     steps:
-    - task: UseNode@1
+    - task: NodeTool@1
       inputs:
-        version: '$(NODE_VERSION)'
-      displayName: 'Use Node.js'
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
 
     - script: npm install
       displayName: 'Install dependencies'
