@@ -11,39 +11,41 @@ steps:
     versionSpec: '18.x'
   displayName: 'Install Node.js'
 
-# Step 2: Install dependencies
-- task: Npm@1
-  displayName: 'npm install'
-  inputs:
-    command: 'install'
-    # This automatically finds package.json if it's in the root or a subfolder
-    workingDir: '$(Build.SourcesDirectory)/data-harmonization' 
+# Step 2: Dynamically find the folder and run npm install
+- script: |
+    # Find the directory containing package.json (ignoring node_modules)
+    TARGET_DIR=$(find . -name "package.json" -not -path "*/node_modules/*" -exec dirname {} \;)
+    echo "##vso[task.setvariable variable=RepoRootDir]$TARGET_DIR"
+    echo "Found package.json in directory: $TARGET_DIR"
+    
+    cd "$TARGET_DIR"
+    npm install
+  displayName: 'Find folder & npm install'
 
-# Step 3: Build
-- task: Npm@1
+# Step 3: Build using the dynamic path
+- script: |
+    cd $(RepoRootDir)
+    npm run build
   displayName: 'npm run build'
-  inputs:
-    command: 'custom'
-    customCommand: 'run build'
-    workingDir: '$(Build.SourcesDirectory)/data-harmonization'
   env:
     CI: false
 
-# Step 4: Test
-- task: Npm@1
+# Step 4: Test using the dynamic path
+- script: |
+    cd $(RepoRootDir)
+    npm test -- --watchAll=false --passWithNoTests
   displayName: 'npm test'
-  inputs:
-    command: 'custom'
-    customCommand: 'test -- --watchAll=false --passWithNoTests'
-    workingDir: '$(Build.SourcesDirectory)/data-harmonization'
   env:
     CI: true
 
-# Step 5: Publish artifact
-# If the build step still errors out saying the directory doesn't exist, 
-# it confirms 'data-harmonization' has different casing (like Data-harmonization) in Git.
+# Step 5: Publish artifact dynamically
+- script: |
+    echo "Checking build output folder..."
+    ls -la $(RepoRootDir)/build
+  displayName: 'Verify Build Output'
+
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'data-harmonization/build'
+    PathtoPublish: '$(RepoRootDir)/build'
     ArtifactName: 'react-build'
   displayName: 'Publish Build Artifact'
