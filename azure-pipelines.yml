@@ -5,35 +5,35 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-# Step 1: Find package.json location
-- script: find . -name "package.json" -not -path "*/node_modules/*"
-  displayName: 'Find package.json'
-
-# Step 2: Install Node
+# Step 1: Install Node
 - task: NodeTool@1
   inputs:
     versionSpec: '18.x'
   displayName: 'Install Node.js'
 
-# Step 3: Install dependencies
+# Step 2: Install dependencies
 - script: npm install
+  workingDirectory: '$(Build.SourcesDirectory)/data-harmonization'
   displayName: 'npm install'
 
-# Step 4: Build
+# Step 3: Build
 - script: npm run build
+  workingDirectory: '$(Build.SourcesDirectory)/data-harmonization'
   displayName: 'npm run build'
   env:
     CI: false
 
-# Step 5: Test
+# Step 4: Test
 - script: npm test -- --watchAll=false --passWithNoTests
+  workingDirectory: '$(Build.SourcesDirectory)/data-harmonization'
   displayName: 'npm test'
   env:
     CI: true
 
-# Step 6: Publish artifact
+# Step 5: Publish artifact
+# This ensures Azure DevOps looks inside the subfolder for the generated 'build' directory
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'build'
+    PathtoPublish: 'data-harmonization/build'
     ArtifactName: 'react-build'
   displayName: 'Publish Build Artifact'
